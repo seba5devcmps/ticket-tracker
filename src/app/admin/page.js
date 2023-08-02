@@ -17,7 +17,7 @@ export default function Page() {
       <Navigation />
       <PageTitle
         title={"Administrador del sistema"}
-        subtitle={"Aquí puede gestionar las oficinas, empleados y servicios"}
+        subtitle={"Aquí puede gestionar las oficinas, agentes y servicios"}
       />
       <div className="flex justify-center">
         <Tabs

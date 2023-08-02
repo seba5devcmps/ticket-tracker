@@ -13,7 +13,6 @@ export default function Page() {
   const [offices, setOffices] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [tickets, setTickets] = useState([]);
-  const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeEmployee, setActiveEmployee] = useState(
     dataInitialState.activeEmployeeInfo
@@ -76,7 +75,7 @@ export default function Page() {
     try {
       const res = await sendMessage(message);
       if (res.statusCode === 200) {
-        setTickets(res.data[0]);
+        setTickets(res.data);
       }
     } catch (error) {
       console.error(error);
@@ -135,6 +134,29 @@ export default function Page() {
     const message = {
       action: "tickets-attend-skip",
       ticket: activeEmployee.ticket.ticket,
+      services: activeEmployee.ticket.services,
+    };
+    try {
+      const res = await sendMessage(message);
+      console.log(res);
+      if (res.statusCode === 200) {
+        setActiveEmployee({
+          ...activeEmployee,
+          state: "waiting",
+          ticket: {},
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    setLoading(false);
+  };
+
+  const handleCancelTicket = async () => {
+    setLoading(true);
+    const message = {
+      action: "tickets-attend-cancel",
+      ticket: activeEmployee.ticket.ticket,
     };
     try {
       const res = await sendMessage(message);
@@ -174,9 +196,9 @@ export default function Page() {
   return (
     <>
       <Navigation />
-      {/* {JSON.stringify(activeEmployee)} */}
-      {/* <br /> */}
-      {/* tickets{JSON.stringify(tickets)} */}
+      {/* {JSON.stringify(activeEmployee)}
+      <br />
+      tickets{JSON.stringify(tickets)} */}
       {/* employees{JSON.stringify(employees)} */}
       <div className="container mx-auto my-5">
         {loading ? (
@@ -225,7 +247,7 @@ export default function Page() {
         ) : activeEmployee?.state === "on call" ? (
           <>
             <PageTitle
-              title={`Empleado: ${activeEmployee.name}`}
+              title={`Agente: ${activeEmployee.name}`}
               subtitle={`Oficina: ${activeEmployee.office}`}
             />
             <div className="flex justify-center items-center flex-col">
@@ -234,16 +256,17 @@ export default function Page() {
                 subtitle={`${activeEmployee?.ticket?.called ? "Segundo llamado" : "Primer llamado"} `}
               />
             </div>
-            <div className="grid grid-cols-2 gap-2 text-center">
+            <div className="grid grid-cols-3 gap-2 text-center">
               <Button onClick={handleStartTicket}>Iniciar Atención</Button>
               <Button onClick={handleSkipTicket}>Saltar ticket</Button>
+              <Button onClick={handleCancelTicket} disabled={parseInt(activeEmployee?.ticket?.skips) === 0}>Cancelar ticket</Button>
               {/* {JSON.stringify(activeEmployee)} */}
             </div>
           </>
         ) : activeEmployee?.state === "attending" ? (
           <>
             <PageTitle
-              title={`Empleado: ${activeEmployee.name}`}
+              title={`Agente: ${activeEmployee.name}`}
               subtitle={`Oficina: ${activeEmployee.office}`}
             />
             <div className="flex justify-center items-center flex-col">
@@ -260,7 +283,7 @@ export default function Page() {
         ) : activeEmployee?.state === "waiting" ? (
           <>
             <PageTitle
-              title={`Empleado: ${activeEmployee.name}`}
+              title={`Agente: ${activeEmployee.name}`}
               subtitle={`Oficina: ${activeEmployee.office}`}
             />
             <div className="grid grid-cols-2 gap-2 text-center">
@@ -269,7 +292,7 @@ export default function Page() {
                   setActiveEmployee({ ...activeEmployee, name: "" });
                 }}
               >
-                Cambiar empleado
+                Cambiar agente
               </Button>
               <Button
                 onClick={() => {
@@ -292,7 +315,7 @@ export default function Page() {
         ) : (
           <>
             <PageTitle
-              title={`Empleado: ${activeEmployee.name}`}
+              title={`Agente: ${activeEmployee.name}`}
               subtitle={`Oficina: ${activeEmployee.office}`}
             />
           </>
